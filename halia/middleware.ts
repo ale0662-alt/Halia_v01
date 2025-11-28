@@ -1,6 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-// Definiamo le pagine pubbliche
 const isPublicRoute = createRouteMatcher([
   '/', 
   '/sign-in(.*)', 
@@ -8,10 +7,15 @@ const isPublicRoute = createRouteMatcher([
   '/api/chat(.*)' 
 ]);
 
-// Versione Standard (Senza async/await)
-export default clerkMiddleware((auth, req) => {
+// 1. Aggiungiamo 'async' qui
+export default clerkMiddleware(async (auth, req) => {
   if (!isPublicRoute(req)) {
-    auth().protect();
+    // 2. Aggiungiamo 'await' qui per "spacchettare" la promessa
+    const { userId, redirectToSignIn } = await auth();
+    
+    if (!userId) {
+      return redirectToSignIn();
+    }
   }
 });
 
